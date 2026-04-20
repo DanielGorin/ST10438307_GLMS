@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ST10438307_GLMS.Observers;
 
 namespace ST10438307_GLMS.Models;
 
@@ -30,9 +31,24 @@ public class Contract
     [Required]
     public string ServiceLevel { get; set; } = string.Empty;
 
-    //For PDF Uplaods
-    public string? SignedAgreementPath { get; set; } 
+    //PDF upload path
+    public string? SignedAgreementPath { get; set; }
 
-    // 1 Contract many Service Requests
     public List<ServiceRequest> ServiceRequests { get; set; } = new();
+
+    // Observer
+    private List<IContractObserver> _observers = new();
+
+    public void Attach(IContractObserver observer)
+    {
+        _observers.Add(observer);
+    }
+
+    public void Notify()
+    {
+        foreach (var observer in _observers)
+        {
+            observer.OnStatusChanged(this);
+        }
+    }
 }
