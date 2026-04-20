@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="ST10438307_GLMS.API/ST10438307_GLMS.API.csproj" />
+  <Project Path="ST10438307_GLMS.Tests/ST10438307_GLMS.Tests.csproj" />
+  <Project Path="ST10438307_GLMS/ST10438307_GLMS.Web.csproj" />
+</Solution>

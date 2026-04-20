@@ -1,0 +1,6 @@
+@ST10438307_GLMS.API_HostAddress = http://localhost:5170
+
+GET {{ST10438307_GLMS.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
