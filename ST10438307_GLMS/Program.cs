@@ -1,6 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Components;
 using ST10438307_GLMS.Data;
+using ST10438307_GLMS.Decorators;
+using ST10438307_GLMS.Factories;
+using ST10438307_GLMS.Observers;
+using ST10438307_GLMS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,10 +12,27 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// Register DbContextFactory for Blazor Server
+// DbContextFactory for Blazor Server
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
+
+// ABSTRACT FACTORY PATTERN: Register all three concrete factories
+
+builder.Services.AddScoped<StandardContractFactory>();
+builder.Services.AddScoped<SLAContractFactory>();
+builder.Services.AddScoped<InternationalContractFactory>();
+
+// OBSERVER PATTERN: Register observers
+
+builder.Services.AddScoped<ServiceRequestValidator>();
+builder.Services.AddScoped<AuditLogger>();
+
+// DECORATOR PATTERN: Wrap FileUploadService with PdfValidationDecorator
+
+builder.Services.AddScoped<FileUploadService>();
+builder.Services.AddScoped<IFileUploadService>(provider =>
+    new PdfValidationDecorator(provider.GetRequiredService<FileUploadService>()));
 
 var app = builder.Build();
 

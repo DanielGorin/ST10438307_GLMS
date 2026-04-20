@@ -8,8 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Factories\" />
-    <Folder Include="Decorators\" />
     <Folder Include="Services\" />
     <Folder Include="wwwroot\uploads\" />
   </ItemGroup>
