@@ -1,0 +1,109 @@
+﻿@page "/servicerequests/create"
+@inject IServiceRequestService ServiceRequestService
+@inject IContractService ContractService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Add New Service Request</h3>
+
+@if (contracts == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4" style="max-width: 550px;">
+        <div class="mb-3">
+            <label class="form-label">Contract</label>
+            <select class="form-select" @bind="selectedContractId">
+                <option value="0">-- Select Contract --</option>
+                @foreach (var contract in contracts)
+                {
+                    <option value="@contract.Id">
+                        @contract.Client?.Name — @contract.ServiceLevel (@contract.Status)
+                    </option>
+                }
+            </select>
+        </div>
+
+        @if (selectedContractId > 0)
+        {
+            var selected = contracts.FirstOrDefault(c => c.Id == selectedContractId);
+            if (selected != null &&
+            (selected.Status == ContractStatus.Expired ||
+            selected.Status == ContractStatus.OnHold))
+            {
+                <div class="alert alert-danger">
+                    ⚠️ This contract is <strong>@selected.Status</strong>.
+                    Service Requests cannot be created for Expired or On Hold contracts.
+                </div>
+            }
+        }
+
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="3" @bind="serviceRequest.Description"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cost (USD)</label>
+            <input type="number" step="0.01" class="form-control"
+                   @bind="serviceRequest.CostUSD" />
+            <div class="form-text">
+                Phase 7 will add live currency conversion to ZAR here.
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    private List<Contract>? contracts;
+    private ServiceRequest serviceRequest = new();
+    private int selectedContractId = 0;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contracts = await ContractService.GetAllContractsAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        errorMessage = string.Empty;
+
+        if (selectedContractId == 0)
+        {
+            errorMessage = "Please select a contract.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(serviceRequest.Description))
+        {
+            errorMessage = "Description is required.";
+            return;
+        }
+
+        serviceRequest.ContractId = selectedContractId;
+        serviceRequest.CostZAR = 0;
+
+        try
+        {
+            await ServiceRequestService.AddServiceRequestAsync(serviceRequest);
+            Nav.NavigateTo("/servicerequests");
+        }
+        catch (InvalidOperationException ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void Cancel() => Nav.NavigateTo("/servicerequests");
+}

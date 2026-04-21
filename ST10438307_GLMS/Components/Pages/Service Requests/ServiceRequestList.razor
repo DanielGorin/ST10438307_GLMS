@@ -1,0 +1,84 @@
+﻿@page "/servicerequests"
+@inject IServiceRequestService ServiceRequestService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Service Requests</h3>
+
+<button class="btn btn-primary mb-3" @onclick="GoToCreate">+ Add New Service Request</button>
+
+@if (serviceRequests == null)
+{
+    <p>Loading...</p>
+}
+else if (serviceRequests.Count == 0)
+{
+    <p>No service requests found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Contract</th>
+                <th>Client</th>
+                <th>Description</th>
+                <th>Cost (USD)</th>
+                <th>Cost (ZAR)</th>
+                <th>Status</th>
+                <th>Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sr in serviceRequests)
+            {
+                <tr>
+                    <td>@sr.Contract?.ServiceLevel</td>
+                    <td>@sr.Contract?.Client?.Name</td>
+                    <td>@sr.Description</td>
+                    <td>$@sr.CostUSD.ToString("F2")</td>
+                    <td>R@sr.CostZAR.ToString("F2")</td>
+                    <td>
+                        <span class="badge bg-info text-dark">@sr.Status</span>
+                    </td>
+                    <td>@sr.CreatedAt.ToShortDateString()</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1"
+                                @onclick="() => GoToEdit(sr.Id)">
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger"
+                                @onclick="() => DeleteServiceRequest(sr.Id)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ServiceRequest>? serviceRequests;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadServiceRequests();
+    }
+
+    private async Task LoadServiceRequests()
+    {
+        serviceRequests = await ServiceRequestService.GetAllServiceRequestsAsync();
+    }
+
+    private void GoToCreate() => Nav.NavigateTo("/servicerequests/create");
+    private void GoToEdit(int id) => Nav.NavigateTo($"/servicerequests/edit/{id}");
+
+    private async Task DeleteServiceRequest(int id)
+    {
+        await ServiceRequestService.DeleteServiceRequestAsync(id);
+        await LoadServiceRequests();
+    }
+}

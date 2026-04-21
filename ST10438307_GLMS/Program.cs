@@ -23,6 +23,10 @@ builder.Services.AddScoped<IClientService, ClientService>();
 //CONTRACT SERVICE
 builder.Services.AddScoped<IContractService, ContractService>();
 
+
+// SERVICE REQUEST SERVICE
+builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+
 // ABSTRACT FACTORY PATTERN: Register all three concrete factories
 
 builder.Services.AddScoped<StandardContractFactory>();

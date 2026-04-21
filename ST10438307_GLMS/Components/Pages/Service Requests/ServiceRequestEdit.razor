@@ -1,0 +1,72 @@
+﻿@page "/servicerequests/edit/{id:int}"
+@inject IServiceRequestService ServiceRequestService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Edit Service Request</h3>
+
+@if (serviceRequest == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4" style="max-width: 550px;">
+        <div class="mb-3">
+            <label class="form-label">Contract</label>
+            <input class="form-control"
+                   value="@serviceRequest.Contract?.Client?.Name — @serviceRequest.Contract?.ServiceLevel"
+                   disabled />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Description</label>
+            <textarea class="form-control" rows="3"
+                      @bind="serviceRequest.Description"></textarea>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cost (USD)</label>
+            <input type="number" step="0.01" class="form-control"
+                   @bind="serviceRequest.CostUSD" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Cost (ZAR)</label>
+            <input type="number" step="0.01" class="form-control"
+                   @bind="serviceRequest.CostZAR" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <input class="form-control" @bind="serviceRequest.Status" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private ServiceRequest? serviceRequest;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        serviceRequest = await ServiceRequestService.GetServiceRequestByIdAsync(Id);
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (serviceRequest == null) return;
+
+        await ServiceRequestService.UpdateServiceRequestAsync(serviceRequest);
+        Nav.NavigateTo("/servicerequests");
+    }
+
+    private void Cancel() => Nav.NavigateTo("/servicerequests");
+}
