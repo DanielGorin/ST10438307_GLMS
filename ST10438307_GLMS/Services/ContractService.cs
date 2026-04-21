@@ -127,6 +127,17 @@ public class ContractService : IContractService
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateSignedAgreementPathAsync(int id, string path)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+        var contract = await context.Contracts.FindAsync(id);
+        if (contract == null) return;
+
+        contract.SignedAgreementPath = path; // store relative path for URL
+        await context.SaveChangesAsync();
+    }
+
+
     public async Task DeleteContractAsync(int id)
     {
         using var context = await _contextFactory.CreateDbContextAsync();

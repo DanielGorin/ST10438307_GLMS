@@ -1,10 +1,13 @@
-﻿@*Form to edit a contract *@
+﻿@* contract edit form *@
 @page "/contracts/edit/{id:int}"
 @inject IContractService ContractService
 @inject IClientService ClientService
+@inject IFileUploadService FileUploadService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
+@using ST10438307_GLMS.Decorators
+@using Microsoft.AspNetCore.Components.Forms
 
 <div class="page-header">
     <h3>Edit Contract</h3>
@@ -48,6 +51,34 @@ else
             <input class="form-control" @bind="contract.ServiceLevel" />
         </div>
 
+        @* signed agreement - shows download if exists *@
+        <div class="mb-3">
+            <label class="form-label">Signed Agreement</label>
+
+            @if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
+            {
+                <div style="margin-bottom: 0.6rem; display: flex; align-items: center; gap: 1rem;">
+                    <span style="color: var(--text-soft); font-size: 0.9rem;">
+                        Current: <strong>@System.IO.Path.GetFileName(contract.SignedAgreementPath)</strong>
+                    </span>
+                    <a href="/@contract.SignedAgreementPath"
+                       target="_blank"
+                       class="btn btn-sm btn-secondary">
+                        Download
+                    </a>
+                </div>
+            }
+
+            <InputFile OnChange="HandleFileSelected" accept=".pdf" class="form-control" />
+
+            @if (!string.IsNullOrEmpty(selectedFileName))
+            {
+                <div style="margin-top: 0.4rem; color: var(--success); font-size: 0.9rem;">
+                    @selectedFileName selected
+                </div>
+            }
+        </div>
+
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger mb-3">@errorMessage</div>
@@ -67,15 +98,44 @@ else
     private List<Client>? clients;
     private string errorMessage = string.Empty;
 
+    //file upload state
+    private IBrowserFile? selectedFile;
+    private string selectedFileName = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         contract = await ContractService.GetContractByIdAsync(Id);
         clients = await ClientService.GetAllClientsAsync();
     }
 
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name;
+    }
+
     private async Task HandleSubmit()
     {
         if (contract == null) return;
+        errorMessage = string.Empty;
+
+        //File Upload - if user picked a new file
+        //-------------------------------------------------------
+        if (selectedFile != null)
+        {
+            try
+            {
+                var path = await FileUploadService.UploadAsync(selectedFile);
+                await ContractService.UpdateSignedAgreementPathAsync(contract.Id, path);
+                contract.SignedAgreementPath = path; 
+            }
+            catch (InvalidOperationException ex)
+            {
+                errorMessage = ex.Message; //wrong file type
+                return;
+            }
+        }
+        //-------------------------------------------------------
 
         await ContractService.UpdateContractStatusAsync(contract.Id, contract.Status);
         await ContractService.UpdateContractAsync(contract);

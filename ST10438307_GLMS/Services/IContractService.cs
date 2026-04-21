@@ -12,5 +12,6 @@ public interface IContractService
     Task AddContractAsync(Contract contract, string contractType);
     Task UpdateContractAsync(Contract contract);
     Task UpdateContractStatusAsync(int id, ContractStatus newStatus);
+    Task UpdateSignedAgreementPathAsync(int id, string path); // saves the uploaded pdf path
     Task DeleteContractAsync(int id);
 }

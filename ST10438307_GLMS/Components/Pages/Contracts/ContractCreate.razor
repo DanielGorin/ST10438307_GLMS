@@ -1,10 +1,13 @@
-﻿@* form to create a new contract *@
+﻿@* contract create form - uses abstract factory based on selected type, handles pdf upload *@
 @page "/contracts/create"
 @inject IContractService ContractService
 @inject IClientService ClientService
+@inject IFileUploadService FileUploadService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
+@using ST10438307_GLMS.Decorators
+@using Microsoft.AspNetCore.Components.Forms
 
 <div class="page-header">
     <h3>Add Contract</h3>
@@ -44,6 +47,18 @@ else
             <input type="date" class="form-control" @bind="contract.EndDate" />
         </div>
 
+        @* pdf upload - decorator handles validation  *@
+        <div class="mb-3">
+            <label class="form-label">Signed Agreement (PDF only)</label>
+            <InputFile OnChange="HandleFileSelected" accept=".pdf" class="form-control" />
+            @if (!string.IsNullOrEmpty(selectedFileName))
+            {
+                <div style="margin-top: 0.4rem; color: var(--success); font-size: 0.9rem;">
+                    @selectedFileName selected
+                </div>
+            }
+        </div>
+
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger mb-3">@errorMessage</div>
@@ -63,18 +78,47 @@ else
     private int selectedClientId = 0;
     private string errorMessage = string.Empty;
 
+    //file upload state
+    private IBrowserFile? selectedFile;
+    private string selectedFileName = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
         clients = await ClientService.GetAllClientsAsync();
     }
 
+    private void HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.File;
+        selectedFileName = e.File.Name; // shows the aneme
+    }
+
     private async Task HandleSubmit()
     {
+        errorMessage = string.Empty;
+
         if (selectedClientId == 0)
         {
             errorMessage = "please select a client.";
             return;
         }
+
+        //File Upload - decorator validates extension
+        //-------------------------------------------------------
+        if (selectedFile != null)
+        {
+            try
+            {
+                var path = await FileUploadService.UploadAsync(selectedFile);
+                contract.SignedAgreementPath = path;
+            }
+            catch (InvalidOperationException ex)
+            {
+                errorMessage = ex.Message; //wrong file type
+                return;
+            }
+        }
+        //-------------------------------------------------------
 
         contract.ClientId = selectedClientId;
         await ContractService.AddContractAsync(contract, contractType);
