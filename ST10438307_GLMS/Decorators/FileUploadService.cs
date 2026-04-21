@@ -15,7 +15,7 @@ public class FileUploadService : IFileUploadService
 
     public async Task<string> UploadAsync(IBrowserFile file)
     {
-        // GUID naming prevents file overwrite collisions
+
         var fileName = $"{Guid.NewGuid()}_{file.Name}";
         var uploadPath = Path.Combine(_env.WebRootPath, "uploads", fileName);
 

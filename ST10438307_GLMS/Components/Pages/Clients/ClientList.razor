@@ -1,0 +1,81 @@
+﻿@page "/clients"
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Clients</h3>
+
+<button class="btn btn-primary mb-3" @onclick="GoToCreate">+ Add New Client</button>
+
+@if (clients == null)
+{
+    <p>Loading...</p>
+}
+else if (clients.Count == 0)
+{
+    <p>No clients found.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Contact Details</th>
+                <th>Region</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in clients)
+            {
+                <tr>
+                    <td>@client.Name</td>
+                    <td>@client.ContactDetails</td>
+                    <td>@client.Region</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1"
+                                @onclick="() => GoToEdit(client.Id)">
+                            Edit
+                        </button>
+                        <button class="btn btn-sm btn-danger"
+                                @onclick="() => DeleteClient(client.Id)">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Client>? clients;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadClients();
+    }
+
+    private async Task LoadClients()
+    {
+        clients = await ClientService.GetAllClientsAsync();
+    }
+
+    private void GoToCreate()
+    {
+        Nav.NavigateTo("/clients/create");
+    }
+
+    private void GoToEdit(int id)
+    {
+        Nav.NavigateTo($"/clients/edit/{id}");
+    }
+
+    private async Task DeleteClient(int id)
+    {
+        await ClientService.DeleteClientAsync(id);
+        await LoadClients();
+    }
+}

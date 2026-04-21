@@ -17,6 +17,9 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 
+// CLIENT SERVICE
+builder.Services.AddScoped<IClientService, ClientService>();
+
 // ABSTRACT FACTORY PATTERN: Register all three concrete factories
 
 builder.Services.AddScoped<StandardContractFactory>();
@@ -49,5 +52,14 @@ app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Ensure database is created and all migrations applied on startup guarantees the app works on any machine without running Update-Database manually
+using (var scope = app.Services.CreateScope())
+{
+    var dbContextFactory = scope.ServiceProvider
+        .GetRequiredService<IDbContextFactory<AppDbContext>>();
+    using var dbContext = await dbContextFactory.CreateDbContextAsync();
+    await dbContext.Database.MigrateAsync();
+}
 
 app.Run();

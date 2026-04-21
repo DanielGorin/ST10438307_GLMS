@@ -1,0 +1,70 @@
+﻿@page "/clients/edit/{id:int}"
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Edit Client</h3>
+
+@if (client == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4" style="max-width: 500px;">
+        <div class="mb-3">
+            <label class="form-label">Name</label>
+            <input class="form-control" @bind="client.Name" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contact Details</label>
+            <input class="form-control" @bind="client.ContactDetails" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Region</label>
+            <input class="form-control" @bind="client.Region" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Client? client;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        client = await ClientService.GetClientByIdAsync(Id);
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (client == null) return;
+
+        if (string.IsNullOrWhiteSpace(client.Name) ||
+            string.IsNullOrWhiteSpace(client.ContactDetails) ||
+            string.IsNullOrWhiteSpace(client.Region))
+        {
+            errorMessage = "All fields are required.";
+            return;
+        }
+
+        await ClientService.UpdateClientAsync(client);
+        Nav.NavigateTo("/clients");
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/clients");
+    }
+}
