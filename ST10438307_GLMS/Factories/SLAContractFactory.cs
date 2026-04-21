@@ -1,8 +1,9 @@
-﻿using ST10438307_GLMS.Models;
+﻿// creates SLA contract
+
+using ST10438307_GLMS.Models;
 
 namespace ST10438307_GLMS.Factories;
 
-//Create SLA contracts with guaranteed service levels
 public class SLAContractFactory : IContractFactory
 {
     public Contract CreateContract()
@@ -12,7 +13,7 @@ public class SLAContractFactory : IContractFactory
             ServiceLevel = "SLA",
             Status = ContractStatus.Draft,
             StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddYears(2)
+            EndDate = DateTime.Today.AddYears(1)
         };
     }
 }

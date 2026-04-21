@@ -1,8 +1,9 @@
-﻿using ST10438307_GLMS.Models;
+﻿// creates a standard contract
+
+using ST10438307_GLMS.Models;
 
 namespace ST10438307_GLMS.Factories;
 
-//Creates basic contracts
 public class StandardContractFactory : IContractFactory
 {
     public Contract CreateContract()

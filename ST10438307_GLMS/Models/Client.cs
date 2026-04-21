@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics.Contracts;
+﻿// client entity - one client many contracts
+
+using System.ComponentModel.DataAnnotations;
 
 namespace ST10438307_GLMS.Models;
 
@@ -16,6 +17,6 @@ public class Client
     [Required]
     public string Region { get; set; } = string.Empty;
 
-    // 1 Client many Contracts
+    // EF uses this to join contracts back to their client
     public List<Contract> Contracts { get; set; } = new();
 }

@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// handles database operations for service requests, uses observer to validate
+
+using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Data;
 using ST10438307_GLMS.Models;
 using ST10438307_GLMS.Observers;
 
 namespace ST10438307_GLMS.Services;
-
-// directly accesse SQLite via DbContextFactory
 
 public class ServiceRequestService : IServiceRequestService
 {
@@ -23,12 +23,15 @@ public class ServiceRequestService : IServiceRequestService
         _auditLogger = auditLogger;
     }
 
+    //Read Operations
+    //-----------------------------------------------------------------------------------------------
+
     public async Task<List<ServiceRequest>> GetAllServiceRequestsAsync()
     {
         using var context = await _contextFactory.CreateDbContextAsync();
         return await context.ServiceRequests
             .Include(sr => sr.Contract)
-            .ThenInclude(c => c.Client)
+            .ThenInclude(c => c.Client) // need client name on the list view
             .ToListAsync();
     }
 
@@ -51,24 +54,29 @@ public class ServiceRequestService : IServiceRequestService
             .FirstOrDefaultAsync(sr => sr.Id == id);
     }
 
+    //-----------------------------------------------------------------------------------------------
+
+    //Write Operations
+    //-----------------------------------------------------------------------------------------------
+
     public async Task AddServiceRequestAsync(ServiceRequest serviceRequest)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        // OBSERVER PATTERN: loads parrent contract and attaches observers
-        //The ServiceRequestValidator checks whether the contract is expired or on hold
+        //Observer Check - load the parent contract and validate 
+        //-------------------------------------------------------
         var contract = await context.Contracts.FindAsync(serviceRequest.ContractId);
         if (contract == null)
-            throw new InvalidOperationException("Contract not found.");
+            throw new InvalidOperationException("contract not found.");
 
         contract.Attach(_validator);
         contract.Attach(_auditLogger);
         contract.Notify();
 
-        if (_validator.IsBlocked)
+        if (_validator.IsBlocked) // Flag based on contract status
             throw new InvalidOperationException(
-                $"Cannot create a Service Request on a contract with status '{contract.Status}'. " +
-                "Only Active or Draft contracts accept new Service Requests.");
+                $"service requests cannot be raised against a contract with status '{contract.Status}'.");
+        //-------------------------------------------------------
 
         context.ServiceRequests.Add(serviceRequest);
         await context.SaveChangesAsync();
@@ -91,4 +99,6 @@ public class ServiceRequestService : IServiceRequestService
             await context.SaveChangesAsync();
         }
     }
+
+    //-----------------------------------------------------------------------------------------------
 }

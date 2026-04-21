@@ -1,3 +1,5 @@
+
+
 using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Components;
 using ST10438307_GLMS.Data;
@@ -8,45 +10,64 @@ using ST10438307_GLMS.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
+//Service Registration
+//-----------------------------------------------------------------------------------------------
+
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
-// DbContextFactory for Blazor Server
+//database
+//-------------------------------------------------------
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
+//-------------------------------------------------------
 
-//CLIENT SERVICE
+//Client Service
+//-------------------------------------------------------
 builder.Services.AddScoped<IClientService, ClientService>();
+//-------------------------------------------------------
 
-//CONTRACT SERVICE
+//Contract Service
+//-------------------------------------------------------
 builder.Services.AddScoped<IContractService, ContractService>();
+//-------------------------------------------------------
 
-
-// SERVICE REQUEST SERVICE
+// Service Request Service
+//-------------------------------------------------------
 builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
+//-------------------------------------------------------
 
-// ABSTRACT FACTORY PATTERN: Register all three concrete factories
-
+// Abstract Factory Pattern - one registration per concrete factory
+//-------------------------------------------------------
 builder.Services.AddScoped<StandardContractFactory>();
 builder.Services.AddScoped<SLAContractFactory>();
 builder.Services.AddScoped<InternationalContractFactory>();
+//-------------------------------------------------------
 
-// OBSERVER PATTERN: Register observers
-
+// Observer Pattern
+//-------------------------------------------------------
 builder.Services.AddScoped<ServiceRequestValidator>();
 builder.Services.AddScoped<AuditLogger>();
+//-------------------------------------------------------
 
-// DECORATOR PATTERN: Wrap FileUploadService with PdfValidationDecorator
-
+//Decorator Pattern - wraps FileUploadService with pdf validation
+//-------------------------------------------------------
 builder.Services.AddScoped<FileUploadService>();
 builder.Services.AddScoped<IFileUploadService>(provider =>
-    new PdfValidationDecorator(provider.GetRequiredService<FileUploadService>()));
+    new PdfValidationDecorator(
+        provider.GetRequiredService<FileUploadService>()
+    )
+);
+//-------------------------------------------------------
+
+//-----------------------------------------------------------------------------------------------
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline
+//Request Pipeline
+//-----------------------------------------------------------------------------------------------
+
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error", createScopeForErrors: true);
@@ -60,13 +81,17 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-// Ensure database is created and all migrations applied on startup guarantees the app works on any machine without running Update-Database manually
+//-----------------------------------------------------------------------------------------------
+
+//Database Startup applies pending migrations
+//-----------------------------------------------------------------------------------------------
 using (var scope = app.Services.CreateScope())
 {
     var dbContextFactory = scope.ServiceProvider
         .GetRequiredService<IDbContextFactory<AppDbContext>>();
     using var dbContext = await dbContextFactory.CreateDbContextAsync();
-    await dbContext.Database.MigrateAsync();
+    await dbContext.Database.MigrateAsync(); // creates db if it not exist
 }
+//-----------------------------------------------------------------------------------------------
 
 app.Run();

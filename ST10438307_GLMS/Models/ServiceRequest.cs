@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿// Service request entity - belongs to a contract stores cost in USD and Zar
+
+using System.ComponentModel.DataAnnotations;
 
 namespace ST10438307_GLMS.Models;
 
@@ -13,12 +15,10 @@ public class ServiceRequest
     [Required]
     public string Description { get; set; } = string.Empty;
 
-    // $ Cost
     [Required]
-    public decimal CostUSD { get; set; }
+    public decimal CostUSD { get; set; } // user entered
 
-    // R Cost
-    public decimal CostZAR { get; set; }
+    public decimal CostZAR { get; set; } // calculated by the currency service
 
     [Required]
     public string Status { get; set; } = "Pending";

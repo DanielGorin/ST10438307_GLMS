@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Components.Forms;
+﻿// decorator pattern interface
+
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace ST10438307_GLMS.Decorators;
-
-//Defines file uplaods
 
 public interface IFileUploadService
 {

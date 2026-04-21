@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// Handles all database operations for contracts
+
+using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Data;
 using ST10438307_GLMS.Factories;
 using ST10438307_GLMS.Models;
@@ -6,7 +8,6 @@ using ST10438307_GLMS.Observers;
 
 namespace ST10438307_GLMS.Services;
 
-// Accesses SQLite via DbContextFactory
 public class ContractService : IContractService
 {
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
@@ -29,21 +30,25 @@ public class ContractService : IContractService
         _auditLogger = auditLogger;
     }
 
+    //Read Operations - fetch contracts from the database
+    //-----------------------------------------------------------------------------------------------
+
     public async Task<List<Contract>> GetAllContractsAsync()
     {
         using var context = await _contextFactory.CreateDbContextAsync();
         return await context.Contracts
-            .Include(c => c.Client)
+            .Include(c => c.Client) // pulls client name in the same query
             .ToListAsync();
     }
 
-    // filter by date,range and status
     public async Task<List<Contract>> GetFilteredContractsAsync(
         DateTime? startDate, DateTime? endDate, ContractStatus? status)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
         var query = context.Contracts.Include(c => c.Client).AsQueryable();
 
+        //Filter application - only applies filters the user actually set
+        //-------------------------------------------------------
         if (startDate.HasValue)
             query = query.Where(c => c.StartDate >= startDate.Value);
 
@@ -52,6 +57,7 @@ public class ContractService : IContractService
 
         if (status.HasValue)
             query = query.Where(c => c.Status == status.Value);
+        //-------------------------------------------------------
 
         return await query.ToListAsync();
     }
@@ -64,25 +70,33 @@ public class ContractService : IContractService
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    // Abstract Factory Pattern: use factory based on contract type
+    //-----------------------------------------------------------------------------------------------
+
+    //Write Operations - create, update and delete contracts
+    //-----------------------------------------------------------------------------------------------
+
     public async Task AddContractAsync(Contract contract, string contractType)
     {
+        //Abstract Factory - picks the right factory based on what type was selected
+        //-------------------------------------------------------
         IContractFactory factory = contractType switch
         {
             "SLA" => _slaFactory,
             "International" => _internationalFactory,
-            _ => _standardFactory
+            _ => _standardFactory // default to standard
         };
+        //-------------------------------------------------------
 
-        var newContract = factory.CreateContract();
+        var newContract = factory.CreateContract(); // factory sets service level and default dates
         newContract.ClientId = contract.ClientId;
         newContract.StartDate = contract.StartDate;
         newContract.EndDate = contract.EndDate;
-        newContract.ServiceLevel = newContract.ServiceLevel;
 
-        // OBSERVER PATERN: attach the audit logger
+        //Observer - log the creation event
+        //-------------------------------------------------------
         newContract.Attach(_auditLogger);
         newContract.Notify();
+        //-------------------------------------------------------
 
         using var context = await _contextFactory.CreateDbContextAsync();
         context.Contracts.Add(newContract);
@@ -96,7 +110,6 @@ public class ContractService : IContractService
         await context.SaveChangesAsync();
     }
 
-    // OBSERVER PATERN: notifies observers about status changes
     public async Task UpdateContractStatusAsync(int id, ContractStatus newStatus)
     {
         using var context = await _contextFactory.CreateDbContextAsync();
@@ -105,9 +118,11 @@ public class ContractService : IContractService
 
         contract.Status = newStatus;
 
-        // atach and notify observers
+        //Observer - notify audit logger every time a status changes
+        //-------------------------------------------------------
         contract.Attach(_auditLogger);
         contract.Notify();
+        //-------------------------------------------------------
 
         await context.SaveChangesAsync();
     }
@@ -122,4 +137,6 @@ public class ContractService : IContractService
             await context.SaveChangesAsync();
         }
     }
+
+    //-----------------------------------------------------------------------------------------------
 }

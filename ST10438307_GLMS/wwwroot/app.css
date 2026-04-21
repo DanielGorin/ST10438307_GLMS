@@ -1,4 +1,11 @@
-/* app.css - global styles for GLMS */
+/* app.css - global styles for GLMS 
+
+    AI was used in this file to
+     - Change fonts
+     - Sift scaling
+     - Tweak colours
+
+*/
 
 /* ------------------------------------------------------------------------------------- */
 /* CSS variables - change these to retheme the whole app */
@@ -18,7 +25,7 @@
     --warning-light: #FFF3E0;
     --neutral: #1C1A27;
     --neutral-soft: #2E2B3D;
-    --bg: #F4F3FA;
+    --bg: #E8E5F5;
     --surface: #FFFFFF;
     --border: #E2E0F0;
     --text-main: #1C1A27;
@@ -30,7 +37,7 @@
     --shadow-sm: 0 1px 4px rgba(87,60,250,0.07);
     --shadow-md: 0 4px 16px rgba(87,60,250,0.10);
     --shadow-lg: 0 8px 32px rgba(87,60,250,0.13);
-    --nav-height: 62px;
+    --nav-height: 80px;
     --font: 'Space Grotesk', sans-serif;
 }
 
@@ -48,7 +55,7 @@ html, body {
     font-family: var(--font);
     background-color: var(--bg);
     color: var(--text-main);
-    font-size: 15px;
+    font-size: 14.5px;
     line-height: 1.6;
     min-height: 100vh;
 }
@@ -62,7 +69,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 h3 {
-    font-size: 1.6rem;
+    font-size: 1.36rem;
     margin-bottom: 1.2rem;
 }
 
@@ -88,6 +95,7 @@ a {
     background: var(--neutral);
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     padding: 0 2rem;
     z-index: 1000;
     box-shadow: 0 2px 12px rgba(0,0,0,0.18);
@@ -96,7 +104,7 @@ a {
 
 /* brand logo area */
 .nav-brand {
-    font-size: 1.15rem;
+    font-size: 1.7rem;
     font-weight: 700;
     color: var(--text-inverse);
     letter-spacing: -0.03em;
@@ -115,33 +123,31 @@ a {
 .nav-links {
     display: flex;
     align-items: center;
+    align-self: stretch;
     gap: 0.25rem;
     list-style: none;
     flex: 1;
 }
 
+    .nav-links li {
+        display: flex;
+        align-items: center;
+        align-self: stretch;
+    }
+
     .nav-links a {
         display: flex;
         align-items: center;
+        justify-content: center;
         gap: 0.4rem;
-        padding: 0.45rem 1rem;
+        padding: 0 1rem;
         border-radius: var(--radius-sm);
         color: rgba(255,255,255,0.72);
         font-weight: 500;
-        font-size: 0.92rem;
+        font-size: 1.28rem;
         transition: all 0.15s ease;
         white-space: nowrap;
     }
-
-        .nav-links a:hover {
-            background: rgba(255,255,255,0.09);
-            color: var(--text-inverse);
-        }
-
-        .nav-links a.active {
-            background: var(--primary);
-            color: var(--text-inverse);
-        }
 
 /* ------------------------------------------------------------------------------------- */
 /* Main content area - offset for fixed nav */
@@ -176,19 +182,19 @@ a {
 
 /* coloured left accent strip on cards */
 .glms-card.accent-primary {
-    border-left: 4px solid var(--primary);
+    border-left: 8px solid var(--primary);
 }
 
 .glms-card.accent-success {
-    border-left: 4px solid var(--success);
+    border-left: 8px solid var(--success);
 }
 
 .glms-card.accent-warning {
-    border-left: 4px solid var(--warning);
+    border-left: 8px solid var(--warning);
 }
 
 .glms-card.accent-danger {
-    border-left: 4px solid var(--danger);
+    border-left: 8px solid var(--danger);
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -217,7 +223,7 @@ a {
     font-weight: 600;
     border-radius: var(--radius-sm);
     padding: 0.45rem 1.1rem;
-    font-size: 0.9rem;
+    font-size: 1.02rem;
     letter-spacing: 0.01em;
     transition: all 0.15s ease;
     border: none;
@@ -270,7 +276,7 @@ a {
 
 .btn-sm {
     padding: 0.3rem 0.75rem;
-    font-size: 0.82rem;
+    font-size: 0.7rem;
 }
 
 /* ------------------------------------------------------------------------------------- */
@@ -281,14 +287,14 @@ a {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    font-size: 0.92rem;
+    font-size: 1.28rem;
 }
 
     .glms-table thead th {
-        background: var(--bg);
+        background: #D8D4ED;
         color: var(--text-soft);
         font-weight: 600;
-        font-size: 0.78rem;
+        font-size: 0.85rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         padding: 0.75rem 1rem;
@@ -328,7 +334,7 @@ a {
 
 .form-label {
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: 1.45rem;
     color: var(--text-soft);
     margin-bottom: 0.35rem;
     letter-spacing: 0.02em;
@@ -340,7 +346,7 @@ a {
     border-radius: var(--radius-sm);
     border: 1.5px solid var(--border);
     padding: 0.55rem 0.9rem;
-    font-size: 0.92rem;
+    font-size: 1.7rem;
     color: var(--text-main);
     background: var(--surface);
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -360,7 +366,7 @@ a {
 .badge {
     font-family: var(--font);
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 1.53rem;
     padding: 0.35em 0.8em;
     border-radius: 999px;
     letter-spacing: 0.04em;
@@ -400,7 +406,7 @@ a {
     border: none;
     font-weight: 500;
     padding: 0.85rem 1.1rem;
-    font-size: 0.92rem;
+    font-size: 0.78rem;
 }
 
 .alert-danger {
@@ -431,7 +437,7 @@ a {
 }
 
     .filter-panel h6 {
-        font-size: 0.82rem;
+        font-size: 1.62rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.07em;

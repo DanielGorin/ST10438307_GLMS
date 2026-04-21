@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿// handles client DB operations
+
+using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Data;
 using ST10438307_GLMS.Models;
 
 namespace ST10438307_GLMS.Services;
 
-//Directly accesses SQLite via DbContextFactory
 public class ClientService : IClientService
 {
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
@@ -13,6 +14,9 @@ public class ClientService : IClientService
     {
         _contextFactory = contextFactory;
     }
+
+    //Read
+    //-----------------------------------------------------------------------------------------------
 
     public async Task<List<Client>> GetAllClientsAsync()
     {
@@ -25,6 +29,11 @@ public class ClientService : IClientService
         using var context = await _contextFactory.CreateDbContextAsync();
         return await context.Clients.FindAsync(id);
     }
+
+    //-----------------------------------------------------------------------------------------------
+
+    // Write
+    //-----------------------------------------------------------------------------------------------
 
     public async Task AddClientAsync(Client client)
     {
@@ -50,4 +59,6 @@ public class ClientService : IClientService
             await context.SaveChangesAsync();
         }
     }
+
+    //-----------------------------------------------------------------------------------------------
 }

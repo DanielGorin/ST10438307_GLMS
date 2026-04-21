@@ -1,4 +1,6 @@
-﻿using ST10438307_GLMS.Models;
+﻿// Observer pattern interface (anything that watches a contract implements this)
+
+using ST10438307_GLMS.Models;
 
 namespace ST10438307_GLMS.Observers;
 

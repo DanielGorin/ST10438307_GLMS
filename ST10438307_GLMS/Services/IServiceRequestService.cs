@@ -1,6 +1,9 @@
-﻿using ST10438307_GLMS.Models;
+﻿// service request interface - defines crud operations for service requests
+
+using ST10438307_GLMS.Models;
 
 namespace ST10438307_GLMS.Services;
+
 
 public interface IServiceRequestService
 {
