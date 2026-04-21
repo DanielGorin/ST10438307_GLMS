@@ -1,7 +1,40 @@
-﻿@page "/"
+﻿@* landing page *@
+@page "/"
 
-<PageTitle>Home</PageTitle>
+<div class="page-header">
+    <h3>Welcome to GLMS</h3>
+</div>
 
-<h1>Hello, world!</h1>
+<div class="row g-4">
 
-Welcome to your new app.
+    <div class="col-md-4">
+        <div class="glms-card accent-primary">
+            <h5>Clients</h5>
+            <p style="color: var(--text-soft); margin-bottom: 1rem;">
+                Manage your client accounts and contact details.
+            </p>
+            <a href="/clients" class="btn btn-primary btn-sm">View Clients</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glms-card accent-success">
+            <h5>Contracts</h5>
+            <p style="color: var(--text-soft); margin-bottom: 1rem;">
+                Track contracts, SLAs, and lifecycle status.
+            </p>
+            <a href="/contracts" class="btn btn-primary btn-sm">View Contracts</a>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="glms-card accent-warning">
+            <h5>Service Requests</h5>
+            <p style="color: var(--text-soft); margin-bottom: 1rem;">
+                Raise and manage service requests against active contracts.
+            </p>
+            <a href="/servicerequests" class="btn btn-primary btn-sm">View Requests</a>
+        </div>
+    </div>
+
+</div>

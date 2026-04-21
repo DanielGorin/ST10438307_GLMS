@@ -1,11 +1,14 @@
-﻿@page "/servicerequests/create"
+﻿@* form to create a service request - observer blocks expired or onhold contracts *@
+@page "/servicerequests/create"
 @inject IServiceRequestService ServiceRequestService
 @inject IContractService ContractService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
 
-<h3>Add New Service Request</h3>
+<div class="page-header">
+    <h3>Add Service Request</h3>
+</div>
 
 @if (contracts == null)
 {
@@ -13,11 +16,11 @@
 }
 else
 {
-    <div class="card p-4" style="max-width: 550px;">
+    <div class="glms-card" style="max-width: 560px;">
         <div class="mb-3">
             <label class="form-label">Contract</label>
             <select class="form-select" @bind="selectedContractId">
-                <option value="0">-- Select Contract --</option>
+                <option value="0">-- select a contract --</option>
                 @foreach (var contract in contracts)
                 {
                     <option value="@contract.Id">
@@ -27,6 +30,7 @@ else
             </select>
         </div>
 
+        @* show warning if selected contract cant accept requests *@
         @if (selectedContractId > 0)
         {
             var selected = contracts.FirstOrDefault(c => c.Id == selectedContractId);
@@ -34,33 +38,36 @@ else
             (selected.Status == ContractStatus.Expired ||
             selected.Status == ContractStatus.OnHold))
             {
-                <div class="alert alert-danger">
-                    ⚠️ This contract is <strong>@selected.Status</strong>.
-                    Service Requests cannot be created for Expired or On Hold contracts.
+                <div class="alert alert-danger mb-3">
+                    ⚠️ this contract is <strong>@selected.Status</strong> — service requests are blocked
                 </div>
             }
         }
 
         <div class="mb-3">
             <label class="form-label">Description</label>
-            <textarea class="form-control" rows="3" @bind="serviceRequest.Description"></textarea>
+            <textarea class="form-control" rows="3"
+                      @bind="serviceRequest.Description"
+                      placeholder="describe the service required..."></textarea>
         </div>
         <div class="mb-3">
             <label class="form-label">Cost (USD)</label>
             <input type="number" step="0.01" class="form-control"
                    @bind="serviceRequest.CostUSD" />
-            <div class="form-text">
-                Phase 7 will add live currency conversion to ZAR here.
+            <div class="form-text" style="color: var(--text-soft); font-size: 0.82rem; margin-top: 0.3rem;">
+                ZAR conversion added in phase 7
             </div>
         </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger mb-3">@errorMessage</div>
         }
 
-        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
-        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary" @onclick="HandleSubmit">Save Request</button>
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
     </div>
 }
 
@@ -81,18 +88,18 @@ else
 
         if (selectedContractId == 0)
         {
-            errorMessage = "Please select a contract.";
+            errorMessage = "please select a contract.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(serviceRequest.Description))
         {
-            errorMessage = "Description is required.";
+            errorMessage = "description is required.";
             return;
         }
 
         serviceRequest.ContractId = selectedContractId;
-        serviceRequest.CostZAR = 0;
+        serviceRequest.CostZAR = 0; 
 
         try
         {
@@ -101,6 +108,7 @@ else
         }
         catch (InvalidOperationException ex)
         {
+            // observer contract is expired or on hold
             errorMessage = ex.Message;
         }
     }

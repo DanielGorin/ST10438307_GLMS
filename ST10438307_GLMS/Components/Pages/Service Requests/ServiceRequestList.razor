@@ -1,64 +1,68 @@
-﻿@page "/servicerequests"
+﻿@* lists all service requests *@
+@page "/servicerequests"
 @inject IServiceRequestService ServiceRequestService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
 
-<h3>Service Requests</h3>
+<div class="page-header">
+    <h3>Service Requests</h3>
+    <button class="btn btn-primary" @onclick="GoToCreate">+ Add Request</button>
+</div>
 
-<button class="btn btn-primary mb-3" @onclick="GoToCreate">+ Add New Service Request</button>
-
-@if (serviceRequests == null)
-{
-    <p>Loading...</p>
-}
-else if (serviceRequests.Count == 0)
-{
-    <p>No service requests found.</p>
-}
-else
-{
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Contract</th>
-                <th>Client</th>
-                <th>Description</th>
-                <th>Cost (USD)</th>
-                <th>Cost (ZAR)</th>
-                <th>Status</th>
-                <th>Created</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var sr in serviceRequests)
-            {
+<div class="glms-card" style="padding: 0; overflow: hidden;">
+    @if (serviceRequests == null)
+    {
+        <p style="padding: 1.5rem;">Loading...</p>
+    }
+    else if (serviceRequests.Count == 0)
+    {
+        <div class="empty-state">No service requests yet.</div>
+    }
+    else
+    {
+        <table class="glms-table">
+            <thead>
                 <tr>
-                    <td>@sr.Contract?.ServiceLevel</td>
-                    <td>@sr.Contract?.Client?.Name</td>
-                    <td>@sr.Description</td>
-                    <td>$@sr.CostUSD.ToString("F2")</td>
-                    <td>R@sr.CostZAR.ToString("F2")</td>
-                    <td>
-                        <span class="badge bg-info text-dark">@sr.Status</span>
-                    </td>
-                    <td>@sr.CreatedAt.ToShortDateString()</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning me-1"
-                                @onclick="() => GoToEdit(sr.Id)">
-                            Edit
-                        </button>
-                        <button class="btn btn-sm btn-danger"
-                                @onclick="() => DeleteServiceRequest(sr.Id)">
-                            Delete
-                        </button>
-                    </td>
+                    <th>Client</th>
+                    <th>Contract</th>
+                    <th>Description</th>
+                    <th>USD</th>
+                    <th>ZAR</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
                 </tr>
-            }
-        </tbody>
-    </table>
-}
+            </thead>
+            <tbody>
+                @foreach (var sr in serviceRequests)
+                {
+                    <tr>
+                        <td><strong>@sr.Contract?.Client?.Name</strong></td>
+                        <td>@sr.Contract?.ServiceLevel</td>
+                        <td>@sr.Description</td>
+                        <td>$@sr.CostUSD.ToString("F2")</td>
+                        <td>R@sr.CostZAR.ToString("F2")</td>
+                        <td>
+                            <span class="badge bg-info">@sr.Status</span>
+                        </td>
+                        <td>@sr.CreatedAt.ToShortDateString()</td>
+                        <td style="display: flex; gap: 0.5rem;">
+                            <button class="btn btn-sm btn-warning"
+                                    @onclick="() => GoToEdit(sr.Id)">
+                                Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => DeleteServiceRequest(sr.Id)">
+                                Delete
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
 
 @code {
     private List<ServiceRequest>? serviceRequests;

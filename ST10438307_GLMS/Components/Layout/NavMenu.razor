@@ -1,27 +1,35 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">ST10438307_GLMS</a>
+﻿@* top navigation bar *@
+@inject NavigationManager Nav
+
+<nav class="top-nav">
+
+    @* brand *@
+    <div class="nav-brand">
+        GLMS <span class="accent">·</span> TechMove
     </div>
-</div>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+    @* nav links *@
+    <ul class="nav-links">
+        <li>
+            <NavLink href="" Match="NavLinkMatch.All">
+                Home
+            </NavLink>
+        </li>
+        <li>
+            <NavLink href="clients">
+                Clients
+            </NavLink>
+        </li>
+        <li>
+            <NavLink href="contracts">
+                Contracts
+            </NavLink>
+        </li>
+        <li>
+            <NavLink href="servicerequests">
+                Service Requests
+            </NavLink>
+        </li>
+    </ul>
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-            <NavLink class="nav-link" href="clients">
-                <span class="bi bi-people-fill" aria-hidden="true"></span> Clients
-            </NavLink>
-            <NavLink class="nav-link" href="contracts">
-                <span class="bi bi-file-earmark-text" aria-hidden="true"></span> Contracts
-            </NavLink>
-            <NavLink class="nav-link" href="servicerequests">
-                <span class="bi bi-clipboard-check" aria-hidden="true"></span> Service Requests
-            </NavLink>
-        </div>
-    </nav>
-</div>
-
+</nav>

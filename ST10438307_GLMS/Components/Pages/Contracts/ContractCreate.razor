@@ -1,11 +1,14 @@
-﻿@page "/contracts/create"
+﻿@* form to create a new contract *@
+@page "/contracts/create"
 @inject IContractService ContractService
 @inject IClientService ClientService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
 
-<h3>Add New Contract</h3>
+<div class="page-header">
+    <h3>Add Contract</h3>
+</div>
 
 @if (clients == null)
 {
@@ -13,11 +16,11 @@
 }
 else
 {
-    <div class="card p-4" style="max-width: 550px;">
+    <div class="glms-card" style="max-width: 560px;">
         <div class="mb-3">
             <label class="form-label">Client</label>
             <select class="form-select" @bind="selectedClientId">
-                <option value="0">-- Select Client --</option>
+                <option value="0">-- select a client --</option>
                 @foreach (var client in clients)
                 {
                     <option value="@client.Id">@client.Name</option>
@@ -43,11 +46,13 @@ else
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger mb-3">@errorMessage</div>
         }
 
-        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
-        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary" @onclick="HandleSubmit">Save Contract</button>
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
     </div>
 }
 
@@ -67,7 +72,7 @@ else
     {
         if (selectedClientId == 0)
         {
-            errorMessage = "Please select a client.";
+            errorMessage = "please select a client.";
             return;
         }
 

@@ -1,11 +1,14 @@
-﻿@page "/contracts/edit/{id:int}"
+﻿@*Form to edit a contract *@
+@page "/contracts/edit/{id:int}"
 @inject IContractService ContractService
 @inject IClientService ClientService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
 
-<h3>Edit Contract</h3>
+<div class="page-header">
+    <h3>Edit Contract</h3>
+</div>
 
 @if (contract == null || clients == null)
 {
@@ -13,7 +16,7 @@
 }
 else
 {
-    <div class="card p-4" style="max-width: 550px;">
+    <div class="glms-card" style="max-width: 560px;">
         <div class="mb-3">
             <label class="form-label">Client</label>
             <select class="form-select" @bind="contract.ClientId">
@@ -47,11 +50,13 @@ else
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert alert-danger mb-3">@errorMessage</div>
         }
 
-        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
-        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-primary" @onclick="HandleSubmit">Save Changes</button>
+            <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+        </div>
     </div>
 }
 
