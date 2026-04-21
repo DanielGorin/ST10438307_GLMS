@@ -1,0 +1,81 @@
+﻿@page "/contracts/edit/{id:int}"
+@inject IContractService ContractService
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Edit Contract</h3>
+
+@if (contract == null || clients == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4" style="max-width: 550px;">
+        <div class="mb-3">
+            <label class="form-label">Client</label>
+            <select class="form-select" @bind="contract.ClientId">
+                @foreach (var client in clients)
+                {
+                    <option value="@client.Id">@client.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" @bind="contract.StartDate" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" @bind="contract.EndDate" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Status</label>
+            <select class="form-select" @bind="contract.Status">
+                @foreach (var status in Enum.GetValues<ContractStatus>())
+                {
+                    <option value="@status">@status</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Service Level</label>
+            <input class="form-control" @bind="contract.ServiceLevel" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Contract? contract;
+    private List<Client>? clients;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contract = await ContractService.GetContractByIdAsync(Id);
+        clients = await ClientService.GetAllClientsAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (contract == null) return;
+
+        await ContractService.UpdateContractStatusAsync(contract.Id, contract.Status);
+        await ContractService.UpdateContractAsync(contract);
+        Nav.NavigateTo("/contracts");
+    }
+
+    private void Cancel() => Nav.NavigateTo("/contracts");
+}

@@ -1,0 +1,80 @@
+﻿@page "/contracts/create"
+@inject IContractService ContractService
+@inject IClientService ClientService
+@inject NavigationManager Nav
+@using ST10438307_GLMS.Models
+@using ST10438307_GLMS.Services
+
+<h3>Add New Contract</h3>
+
+@if (clients == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="card p-4" style="max-width: 550px;">
+        <div class="mb-3">
+            <label class="form-label">Client</label>
+            <select class="form-select" @bind="selectedClientId">
+                <option value="0">-- Select Client --</option>
+                @foreach (var client in clients)
+                {
+                    <option value="@client.Id">@client.Name</option>
+                }
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contract Type</label>
+            <select class="form-select" @bind="contractType">
+                <option value="Standard">Standard</option>
+                <option value="SLA">SLA</option>
+                <option value="International">International</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" @bind="contract.StartDate" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" @bind="contract.EndDate" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <button class="btn btn-primary me-2" @onclick="HandleSubmit">Save</button>
+        <button class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    private List<Client>? clients;
+    private Contract contract = new();
+    private string contractType = "Standard";
+    private int selectedClientId = 0;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clients = await ClientService.GetAllClientsAsync();
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (selectedClientId == 0)
+        {
+            errorMessage = "Please select a client.";
+            return;
+        }
+
+        contract.ClientId = selectedClientId;
+        await ContractService.AddContractAsync(contract, contractType);
+        Nav.NavigateTo("/contracts");
+    }
+
+    private void Cancel() => Nav.NavigateTo("/contracts");
+}

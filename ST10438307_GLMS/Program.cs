@@ -17,8 +17,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 
-// CLIENT SERVICE
+//CLIENT SERVICE
 builder.Services.AddScoped<IClientService, ClientService>();
+
+//CONTRACT SERVICE
+builder.Services.AddScoped<IContractService, ContractService>();
 
 // ABSTRACT FACTORY PATTERN: Register all three concrete factories
 
