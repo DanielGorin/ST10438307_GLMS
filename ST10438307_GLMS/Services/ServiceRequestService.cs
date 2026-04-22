@@ -1,4 +1,5 @@
-﻿// handles database operations for service requests, uses observer to validate contract status
+﻿//Testing push
+// handles database operations for service requests, uses observer to validate contract status
 
 using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Data;
