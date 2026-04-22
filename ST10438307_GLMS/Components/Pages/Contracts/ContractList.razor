@@ -1,4 +1,4 @@
-﻿@* Lists contracts with filter *@
+﻿@* lists all contracts with filter panel and coloured inline status dropdown *@
 @page "/contracts"
 @inject IContractService ContractService
 @inject NavigationManager Nav
@@ -70,9 +70,15 @@
                         <td>@contract.StartDate.ToShortDateString()</td>
                         <td>@contract.EndDate.ToShortDateString()</td>
                         <td>
-                            <span class="badge @GetStatusBadge(contract.Status)">
-                                @contract.Status
-                            </span>
+                            <select style="@GetStatusStyle(contract.Status)"
+                                    @onchange="(e) => HandleStatusChange(contract, e)">
+                                @foreach (var status in Enum.GetValues<ContractStatus>())
+                                {
+                                    <option value="@status" selected="@(contract.Status == status)">
+                                        @status
+                                    </option>
+                                }
+                            </select>
                         </td>
                         <td>
                             @if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
@@ -139,6 +145,18 @@
         await LoadContracts();
     }
 
+    //Status Change - saves immediately, dropdown recolours to match new status
+    //-----------------------------------------------------------------------------------------------
+    private async Task HandleStatusChange(Contract contract, ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ContractStatus>(e.Value?.ToString(), out var newStatus))
+        {
+            await ContractService.UpdateContractStatusAsync(contract.Id, newStatus);
+            contract.Status = newStatus; // update local state so colour changes instantly
+        }
+    }
+    //-----------------------------------------------------------------------------------------------
+
     private void GoToCreate() => Nav.NavigateTo("/contracts/create");
     private void GoToEdit(int id) => Nav.NavigateTo($"/contracts/edit/{id}");
 
@@ -148,11 +166,16 @@
         await LoadContracts();
     }
 
-    private string GetStatusBadge(ContractStatus status) => status switch
+    //inline style so browser cant override with OS native select rendering
+    private string GetStatusStyle(ContractStatus status)
     {
-        ContractStatus.Active => "bg-success",
-        ContractStatus.Expired => "bg-danger",
-        ContractStatus.OnHold => "bg-warning",
-        _ => "bg-secondary"
-    };
+        var colour = status switch
+        {
+            ContractStatus.Active => "#02864A",
+            ContractStatus.Expired => "#E8083E",
+            ContractStatus.OnHold => "#FB8D1A",
+            _ => "#6B6880"
+        };
+        return $"background:{colour};color:#fff;border:none;border-radius:999px;padding:0.3em 0.9em;font-weight:600;font-size:0.85rem;cursor:pointer;appearance:none;-webkit-appearance:none;";
+    }
 }

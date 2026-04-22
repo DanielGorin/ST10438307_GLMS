@@ -69,7 +69,12 @@ else
 
         <div class="mb-3">
             <label class="form-label">Status</label>
-            <input class="form-control" @bind="serviceRequest.Status" />
+            <select class="form-select" @bind="serviceRequest.Status">
+                @foreach (var status in Enum.GetValues<ServiceRequestStatus>())
+                {
+                    <option value="@status">@status</option>
+                }
+            </select>
         </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))

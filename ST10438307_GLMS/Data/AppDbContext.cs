@@ -37,6 +37,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Contract>()
             .Property(c => c.Status)
             .HasConversion<string>();
+
+        modelBuilder.Entity<ServiceRequest>()
+            .Property(sr => sr.Status)
+            .HasConversion<string>();
     }
     //-----------------------------------------------------------------------------------------------
 }

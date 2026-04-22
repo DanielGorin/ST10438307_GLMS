@@ -1,4 +1,4 @@
-﻿@* lists all service requests *@
+﻿@* lists all service requests with coloured inline status dropdown *@
 @page "/servicerequests"
 @inject IServiceRequestService ServiceRequestService
 @inject NavigationManager Nav
@@ -42,7 +42,15 @@
                         <td>@sr.Description</td>
                         <td>R @sr.CostZAR.ToString("F2")</td>
                         <td>
-                            <span class="badge bg-info">@sr.Status</span>
+                            <select style="@GetStatusStyle(sr.Status)"
+                                    @onchange="(e) => HandleStatusChange(sr, e)">
+                                @foreach (var status in Enum.GetValues<ServiceRequestStatus>())
+                                {
+                                    <option value="@status" selected="@(sr.Status == status)">
+                                        @status
+                                    </option>
+                                }
+                            </select>
                         </td>
                         <td>@sr.CreatedAt.ToShortDateString()</td>
                         <td style="display: flex; gap: 0.5rem;">
@@ -75,6 +83,18 @@
         serviceRequests = await ServiceRequestService.GetAllServiceRequestsAsync();
     }
 
+    //Status Change - saves immediately, dropdown recolours to match new status
+    //-----------------------------------------------------------------------------------------------
+    private async Task HandleStatusChange(ServiceRequest sr, ChangeEventArgs e)
+    {
+        if (Enum.TryParse<ServiceRequestStatus>(e.Value?.ToString(), out var newStatus))
+        {
+            await ServiceRequestService.UpdateServiceRequestStatusAsync(sr.Id, newStatus);
+            sr.Status = newStatus; // update local state so colour changes instantly
+        }
+    }
+    //-----------------------------------------------------------------------------------------------
+
     private void GoToCreate() => Nav.NavigateTo("/servicerequests/create");
     private void GoToEdit(int id) => Nav.NavigateTo($"/servicerequests/edit/{id}");
 
@@ -82,5 +102,19 @@
     {
         await ServiceRequestService.DeleteServiceRequestAsync(id);
         await LoadServiceRequests();
+    }
+
+    //inline style so browser cant override with OS native select rendering
+    private string GetStatusStyle(ServiceRequestStatus status)
+    {
+        var colour = status switch
+        {
+            ServiceRequestStatus.Pending => "#573CFA",
+            ServiceRequestStatus.InProgress => "#FB8D1A",
+            ServiceRequestStatus.Completed => "#02864A",
+            ServiceRequestStatus.Cancelled => "#6B6880",
+            _ => "#573CFA"
+        };
+        return $"background:{colour};color:#fff;border:none;border-radius:999px;padding:0.3em 0.9em;font-weight:600;font-size:0.85rem;cursor:pointer;appearance:none;-webkit-appearance:none;";
     }
 }

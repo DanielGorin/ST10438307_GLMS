@@ -89,6 +89,16 @@ public class ServiceRequestService : IServiceRequestService
         await context.SaveChangesAsync();
     }
 
+    public async Task UpdateServiceRequestStatusAsync(int id, ServiceRequestStatus newStatus)
+    {
+        using var context = await _contextFactory.CreateDbContextAsync();
+        var sr = await context.ServiceRequests.FindAsync(id);
+        if (sr == null) return;
+
+        sr.Status = newStatus;
+        await context.SaveChangesAsync();
+    }
+
     public async Task DeleteServiceRequestAsync(int id)
     {
         using var context = await _contextFactory.CreateDbContextAsync();

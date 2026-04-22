@@ -13,7 +13,7 @@
 
 :root {
     --primary: #573CFA;
-    --primary-light: #EAE6FF;
+    --primary-light: E6F7FF;
     --primary-dark: #3D25D4;
     --secondary: #FB8D1A;
     --secondary-light: #FFF3E0;
@@ -472,3 +472,52 @@ a {
     .blazor-error-boundary::after {
         content: "something went wrong - reload the page";
     }
+
+/* ------------------------------------------------------------------------------------- */
+/* Inline status dropdown - coloured background on the select itself */
+/* ------------------------------------------------------------------------------------- */
+
+.status-select {
+    border: none;
+    border-radius: 999px;
+    padding: 0.3em 0.9em;
+    font-family: var(--font);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    color: #fff;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+.status-active {
+    background: var(--success) !important;
+}
+
+.status-expired {
+    background: var(--danger) !important;
+}
+
+.status-onhold {
+    background: var(--warning) !important;
+}
+
+.status-draft {
+    background: var(--text-soft) !important;
+}
+
+.status-pending {
+    background: var(--primary) !important;
+}
+
+.status-inprogress {
+    background: var(--secondary) !important;
+}
+
+.status-completed {
+    background: var(--success) !important;
+}
+
+.status-cancelled {
+    background: var(--text-soft) !important;
+}
