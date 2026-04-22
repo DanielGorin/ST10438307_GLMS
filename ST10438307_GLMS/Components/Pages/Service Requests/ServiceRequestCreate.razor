@@ -1,4 +1,4 @@
-﻿@* service request create*@
+﻿@* service request create *@
 @page "/servicerequests/create"
 @inject IServiceRequestService ServiceRequestService
 @inject IContractService ContractService
@@ -52,7 +52,6 @@ else
                       placeholder="describe the service required..."></textarea>
         </div>
 
-        @* dual currency input - type in either box, the other updates automatically *@
         <div class="mb-3">
             <label class="form-label">
                 Cost
@@ -62,18 +61,27 @@ else
                         rate: 1 USD = @exchangeRate.ToString("F4") ZAR
                     </span>
                 }
+                else
+                {
+                    <span style="color: var(--text-soft); font-size: 0.82rem; font-weight: 400; margin-left: 0.5rem;">
+                        fetching live rate...
+                    </span>
+                }
             </label>
-            <div style="display: flex; gap: 0.75rem;">
+
+            @* intercepts the value and update the other box *@
+            <div style="display: flex; gap: 0.75rem; align-items: flex-end;">
                 <div style="flex: 1;">
                     <div style="color: var(--text-soft); font-size: 0.82rem; margin-bottom: 0.25rem;">USD</div>
                     <input type="number"
                            step="0.01"
                            class="form-control"
-                           value="@usdDisplay"
-                           @oninput="HandleUsdInput"
+                           @bind:get="usdDisplay"
+                           @bind:set="HandleUsdSet"
+                           @bind:event="oninput"
                            placeholder="0.00" />
                 </div>
-                <div style="display: flex; align-items: flex-end; padding-bottom: 0.55rem; color: var(--text-soft);">
+                <div style="padding-bottom: 0.6rem; color: var(--text-soft); font-size: 1.2rem;">
                     =
                 </div>
                 <div style="flex: 1;">
@@ -81,17 +89,12 @@ else
                     <input type="number"
                            step="0.01"
                            class="form-control"
-                           value="@zarDisplay"
-                           @oninput="HandleZarInput"
+                           @bind:get="zarDisplay"
+                           @bind:set="HandleZarSet"
+                           @bind:event="oninput"
                            placeholder="0.00" />
                 </div>
             </div>
-            @if (exchangeRate == 0)
-            {
-                <div style="color: var(--text-soft); font-size: 0.82rem; margin-top: 0.3rem;">
-                    fetching live rate...
-                </div>
-            }
         </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -112,7 +115,7 @@ else
     private int selectedContractId = 0;
     private string errorMessage = string.Empty;
 
-    //currency state - rate fetched once, conversions done locally
+    //currency state
     private decimal exchangeRate = 0;
     private decimal usdDisplay = 0;
     private decimal zarDisplay = 0;
@@ -123,24 +126,18 @@ else
         exchangeRate = await CurrencyService.GetUsdToZarRateAsync();
     }
 
-    //Input Handlers - typing in either box updates the other
+    //Input Handlers fires on each keystroke
     //-----------------------------------------------------------------------------------------------
-    private void HandleUsdInput(ChangeEventArgs e)
+    private void HandleUsdSet(decimal value)
     {
-        if (decimal.TryParse(e.Value?.ToString(), out var amount))
-        {
-            usdDisplay = amount;
-            zarDisplay = CurrencyService.ConvertUsdToZar(amount, exchangeRate);
-        }
+        usdDisplay = Math.Round(value, 2);
+        zarDisplay = Math.Round(CurrencyService.ConvertUsdToZar(usdDisplay, exchangeRate), 2);
     }
 
-    private void HandleZarInput(ChangeEventArgs e)
+    private void HandleZarSet(decimal value)
     {
-        if (decimal.TryParse(e.Value?.ToString(), out var amount))
-        {
-            zarDisplay = amount;
-            usdDisplay = CurrencyService.ConvertZarToUsd(amount, exchangeRate);
-        }
+        zarDisplay = Math.Round(value, 2);
+        usdDisplay = Math.Round(CurrencyService.ConvertZarToUsd(zarDisplay, exchangeRate), 2);
     }
     //-----------------------------------------------------------------------------------------------
 
@@ -167,7 +164,7 @@ else
         }
 
         serviceRequest.ContractId = selectedContractId;
-        serviceRequest.CostZAR = zarDisplay; // save in rands
+        serviceRequest.CostZAR = zarDisplay;
 
         try
         {
@@ -176,7 +173,7 @@ else
         }
         catch (InvalidOperationException ex)
         {
-            errorMessage = ex.Message; // Observer - contract is blocked
+            errorMessage = ex.Message;
         }
     }
 
