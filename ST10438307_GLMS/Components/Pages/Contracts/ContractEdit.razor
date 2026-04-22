@@ -48,7 +48,11 @@ else
         </div>
         <div class="mb-3">
             <label class="form-label">Service Level</label>
-            <input class="form-control" @bind="contract.ServiceLevel" />
+            <input class="form-control" value="@contract.ServiceLevel" disabled
+                   style="background: var(--bg); color: var(--text-soft); cursor: not-allowed;" />
+            <div style="font-size: 0.82rem; color: var(--text-soft); margin-top: 0.3rem;">
+                set at creation and cannot be changed
+            </div>
         </div>
 
         @* signed agreement - shows download if exists *@

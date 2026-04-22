@@ -39,7 +39,7 @@
                     <tr>
                         <td><strong>@sr.Contract?.Client?.Name</strong></td>
                         <td>@sr.Contract?.ServiceLevel</td>
-                        <td>@sr.Description</td>
+                        <td class="cell-truncate">@sr.Description</td>
                         <td>R @sr.CostZAR.ToString("F2")</td>
                         <td>
                             <select style="@GetStatusStyle(sr.Status)"
@@ -104,7 +104,9 @@
         await LoadServiceRequests();
     }
 
-    //inline style so browser cant override with OS native select rendering
+    //Inline Coloured Dropdowns
+    //This section was created with teh assistance of AI
+    //-----------------------------------------------------------------------------------------------
     private string GetStatusStyle(ServiceRequestStatus status)
     {
         var colour = status switch
@@ -117,4 +119,6 @@
         };
         return $"background:{colour};color:#fff;border:none;border-radius:999px;padding:0.3em 0.9em;font-weight:600;font-size:0.85rem;cursor:pointer;appearance:none;-webkit-appearance:none;";
     }
+    //-----------------------------------------------------------------------------------------------
+
 }

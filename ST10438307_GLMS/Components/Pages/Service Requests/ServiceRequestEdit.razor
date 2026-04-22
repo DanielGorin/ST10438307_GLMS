@@ -106,10 +106,11 @@ else
         serviceRequest = await ServiceRequestService.GetServiceRequestByIdAsync(Id);
         exchangeRate = await CurrencyService.GetUsdToZarRateAsync();
     }
-
+    // waits for both the database and exchange rate to be ready before pre-filling the currency boxes
+    //This Section was created with teh assistance of AI
+    //-----------------------------------------------------------------------------------------------
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        // wait until both the service request and rate are ready before populating
         if (!initialised && serviceRequest != null && exchangeRate > 0)
         {
             zarDisplay = Math.Round(serviceRequest.CostZAR, 2);
@@ -118,6 +119,8 @@ else
             StateHasChanged();
         }
     }
+    //-----------------------------------------------------------------------------------------------
+
 
     //Input Handlers
     //-----------------------------------------------------------------------------------------------
