@@ -1,7 +1,8 @@
-﻿@* form to create a service request - observer blocks expired or onhold contracts *@
+﻿@* service request create*@
 @page "/servicerequests/create"
 @inject IServiceRequestService ServiceRequestService
 @inject IContractService ContractService
+@inject ICurrencyService CurrencyService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
@@ -16,7 +17,7 @@
 }
 else
 {
-    <div class="glms-card" style="max-width: 560px;">
+    <div class="glms-card" style="max-width: 600px;">
         <div class="mb-3">
             <label class="form-label">Contract</label>
             <select class="form-select" @bind="selectedContractId">
@@ -30,7 +31,7 @@ else
             </select>
         </div>
 
-        @* show warning if selected contract cant accept requests *@
+        @* observer blocks expired or on hold contracts *@
         @if (selectedContractId > 0)
         {
             var selected = contracts.FirstOrDefault(c => c.Id == selectedContractId);
@@ -39,7 +40,7 @@ else
             selected.Status == ContractStatus.OnHold))
             {
                 <div class="alert alert-danger mb-3">
-                    ⚠️ this contract is <strong>@selected.Status</strong> — service requests are blocked
+                    this contract is <strong>@selected.Status</strong> — service requests are blocked
                 </div>
             }
         }
@@ -50,13 +51,47 @@ else
                       @bind="serviceRequest.Description"
                       placeholder="describe the service required..."></textarea>
         </div>
+
+        @* dual currency input - type in either box, the other updates automatically *@
         <div class="mb-3">
-            <label class="form-label">Cost (USD)</label>
-            <input type="number" step="0.01" class="form-control"
-                   @bind="serviceRequest.CostUSD" />
-            <div class="form-text" style="color: var(--text-soft); font-size: 0.82rem; margin-top: 0.3rem;">
-                ZAR conversion added in phase 7
+            <label class="form-label">
+                Cost
+                @if (exchangeRate > 0)
+                {
+                    <span style="color: var(--text-soft); font-size: 0.82rem; font-weight: 400; margin-left: 0.5rem;">
+                        rate: 1 USD = @exchangeRate.ToString("F4") ZAR
+                    </span>
+                }
+            </label>
+            <div style="display: flex; gap: 0.75rem;">
+                <div style="flex: 1;">
+                    <div style="color: var(--text-soft); font-size: 0.82rem; margin-bottom: 0.25rem;">USD</div>
+                    <input type="number"
+                           step="0.01"
+                           class="form-control"
+                           value="@usdDisplay"
+                           @oninput="HandleUsdInput"
+                           placeholder="0.00" />
+                </div>
+                <div style="display: flex; align-items: flex-end; padding-bottom: 0.55rem; color: var(--text-soft);">
+                    =
+                </div>
+                <div style="flex: 1;">
+                    <div style="color: var(--text-soft); font-size: 0.82rem; margin-bottom: 0.25rem;">ZAR</div>
+                    <input type="number"
+                           step="0.01"
+                           class="form-control"
+                           value="@zarDisplay"
+                           @oninput="HandleZarInput"
+                           placeholder="0.00" />
+                </div>
             </div>
+            @if (exchangeRate == 0)
+            {
+                <div style="color: var(--text-soft); font-size: 0.82rem; margin-top: 0.3rem;">
+                    fetching live rate...
+                </div>
+            }
         </div>
 
         @if (!string.IsNullOrEmpty(errorMessage))
@@ -77,10 +112,37 @@ else
     private int selectedContractId = 0;
     private string errorMessage = string.Empty;
 
+    //currency state - rate fetched once, conversions done locally
+    private decimal exchangeRate = 0;
+    private decimal usdDisplay = 0;
+    private decimal zarDisplay = 0;
+
     protected override async Task OnInitializedAsync()
     {
         contracts = await ContractService.GetAllContractsAsync();
+        exchangeRate = await CurrencyService.GetUsdToZarRateAsync();
     }
+
+    //Input Handlers - typing in either box updates the other
+    //-----------------------------------------------------------------------------------------------
+    private void HandleUsdInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount))
+        {
+            usdDisplay = amount;
+            zarDisplay = CurrencyService.ConvertUsdToZar(amount, exchangeRate);
+        }
+    }
+
+    private void HandleZarInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount))
+        {
+            zarDisplay = amount;
+            usdDisplay = CurrencyService.ConvertZarToUsd(amount, exchangeRate);
+        }
+    }
+    //-----------------------------------------------------------------------------------------------
 
     private async Task HandleSubmit()
     {
@@ -98,8 +160,14 @@ else
             return;
         }
 
+        if (zarDisplay <= 0)
+        {
+            errorMessage = "please enter a cost amount.";
+            return;
+        }
+
         serviceRequest.ContractId = selectedContractId;
-        serviceRequest.CostZAR = 0; 
+        serviceRequest.CostZAR = zarDisplay; // save in rands
 
         try
         {
@@ -108,8 +176,7 @@ else
         }
         catch (InvalidOperationException ex)
         {
-            // observer contract is expired or on hold
-            errorMessage = ex.Message;
+            errorMessage = ex.Message; // Observer - contract is blocked
         }
     }
 

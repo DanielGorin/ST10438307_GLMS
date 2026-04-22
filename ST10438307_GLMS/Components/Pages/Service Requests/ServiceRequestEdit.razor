@@ -1,6 +1,7 @@
-﻿@* form to edit an existing service request *@
+﻿@* service request edit *@
 @page "/servicerequests/edit/{id:int}"
 @inject IServiceRequestService ServiceRequestService
+@inject ICurrencyService CurrencyService
 @inject NavigationManager Nav
 @using ST10438307_GLMS.Models
 @using ST10438307_GLMS.Services
@@ -15,7 +16,7 @@
 }
 else
 {
-    <div class="glms-card" style="max-width: 560px;">
+    <div class="glms-card" style="max-width: 600px;">
         <div class="mb-3">
             <label class="form-label">Contract</label>
             <input class="form-control"
@@ -27,16 +28,43 @@ else
             <textarea class="form-control" rows="3"
                       @bind="serviceRequest.Description"></textarea>
         </div>
+
+        @* dual currency input pre-populated from saved zar value *@
         <div class="mb-3">
-            <label class="form-label">Cost (USD)</label>
-            <input type="number" step="0.01" class="form-control"
-                   @bind="serviceRequest.CostUSD" />
+            <label class="form-label">
+                Cost
+                @if (exchangeRate > 0)
+                {
+                    <span style="color: var(--text-soft); font-size: 0.82rem; font-weight: 400; margin-left: 0.5rem;">
+                        rate: 1 USD = @exchangeRate.ToString("F4") ZAR
+                    </span>
+                }
+            </label>
+            <div style="display: flex; gap: 0.75rem;">
+                <div style="flex: 1;">
+                    <div style="color: var(--text-soft); font-size: 0.82rem; margin-bottom: 0.25rem;">USD</div>
+                    <input type="number"
+                           step="0.01"
+                           class="form-control"
+                           value="@usdDisplay"
+                           @oninput="HandleUsdInput"
+                           placeholder="0.00" />
+                </div>
+                <div style="display: flex; align-items: flex-end; padding-bottom: 0.55rem; color: var(--text-soft);">
+                    =
+                </div>
+                <div style="flex: 1;">
+                    <div style="color: var(--text-soft); font-size: 0.82rem; margin-bottom: 0.25rem;">ZAR</div>
+                    <input type="number"
+                           step="0.01"
+                           class="form-control"
+                           value="@zarDisplay"
+                           @oninput="HandleZarInput"
+                           placeholder="0.00" />
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label class="form-label">Cost (ZAR)</label>
-            <input type="number" step="0.01" class="form-control"
-                   @bind="serviceRequest.CostZAR" />
-        </div>
+
         <div class="mb-3">
             <label class="form-label">Status</label>
             <input class="form-control" @bind="serviceRequest.Status" />
@@ -60,14 +88,57 @@ else
     private ServiceRequest? serviceRequest;
     private string errorMessage = string.Empty;
 
+    //currency state
+    private decimal exchangeRate = 0;
+    private decimal usdDisplay = 0;
+    private decimal zarDisplay = 0;
+
     protected override async Task OnInitializedAsync()
     {
         serviceRequest = await ServiceRequestService.GetServiceRequestByIdAsync(Id);
+        exchangeRate = await CurrencyService.GetUsdToZarRateAsync();
+
+        if (serviceRequest != null)
+        {
+            //pre-populate both boxes from the saved zar value
+            zarDisplay = serviceRequest.CostZAR;
+            usdDisplay = CurrencyService.ConvertZarToUsd(zarDisplay, exchangeRate);
+        }
     }
+
+    //Input Handlers - same logic as create, typing either box updates the other
+    //-----------------------------------------------------------------------------------------------
+    private void HandleUsdInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount))
+        {
+            usdDisplay = amount;
+            zarDisplay = CurrencyService.ConvertUsdToZar(amount, exchangeRate);
+        }
+    }
+
+    private void HandleZarInput(ChangeEventArgs e)
+    {
+        if (decimal.TryParse(e.Value?.ToString(), out var amount))
+        {
+            zarDisplay = amount;
+            usdDisplay = CurrencyService.ConvertZarToUsd(amount, exchangeRate);
+        }
+    }
+    //-----------------------------------------------------------------------------------------------
 
     private async Task HandleSubmit()
     {
         if (serviceRequest == null) return;
+        errorMessage = string.Empty;
+
+        if (zarDisplay <= 0)
+        {
+            errorMessage = "please enter a cost amount.";
+            return;
+        }
+
+        serviceRequest.CostZAR = zarDisplay; //Save in rands
 
         await ServiceRequestService.UpdateServiceRequestAsync(serviceRequest);
         Nav.NavigateTo("/servicerequests");

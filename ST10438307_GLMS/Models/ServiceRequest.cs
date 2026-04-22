@@ -1,4 +1,4 @@
-﻿// Service request entity - belongs to a contract stores cost in USD and Zar
+﻿// service request entity - belongs to a contract, stores cost in ZAR
 
 using System.ComponentModel.DataAnnotations;
 
@@ -15,10 +15,7 @@ public class ServiceRequest
     [Required]
     public string Description { get; set; } = string.Empty;
 
-    [Required]
-    public decimal CostUSD { get; set; } // user entered
-
-    public decimal CostZAR { get; set; } // calculated by the currency service
+    public decimal CostZAR { get; set; } // Stored in ZAR
 
     [Required]
     public string Status { get; set; } = "Pending";

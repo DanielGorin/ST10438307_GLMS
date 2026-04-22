@@ -23,6 +23,12 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 //-------------------------------------------------------
 
+//Currency Service 
+//-------------------------------------------------------
+builder.Services.AddHttpClient<CurrencyService>();
+builder.Services.AddScoped<ICurrencyService, CurrencyService>();
+//-------------------------------------------------------
+
 //Client Service
 //-------------------------------------------------------
 builder.Services.AddScoped<IClientService, ClientService>();
