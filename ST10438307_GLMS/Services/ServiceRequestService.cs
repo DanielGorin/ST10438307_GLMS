@@ -1,4 +1,4 @@
-﻿// handles database operations for service requests, uses observer to validate
+﻿// handles database operations for service requests, uses observer to validate contract status
 
 using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Data;
@@ -63,17 +63,26 @@ public class ServiceRequestService : IServiceRequestService
     {
         using var context = await _contextFactory.CreateDbContextAsync();
 
-        //Observer Check - load the parent contract and validate 
+        //Observer Check - validate parent contract
         //-------------------------------------------------------
         var contract = await context.Contracts.FindAsync(serviceRequest.ContractId);
         if (contract == null)
             throw new InvalidOperationException("contract not found.");
 
+        //Input Validation
+        //-------------------------------------------------------
+        if (string.IsNullOrWhiteSpace(serviceRequest.Description))
+            throw new InvalidOperationException("description cannot be empty.");
+
+        if (serviceRequest.CostZAR < 0)
+            throw new InvalidOperationException("cost cannot be negative.");
+        //-------------------------------------------------------
+
         contract.Attach(_validator);
         contract.Attach(_auditLogger);
         contract.Notify();
 
-        if (_validator.IsBlocked) // Flag based on contract status
+        if (_validator.IsBlocked) // flag set by observer based on contract status
             throw new InvalidOperationException(
                 $"service requests cannot be raised against a contract with status '{contract.Status}'.");
         //-------------------------------------------------------
