@@ -1,4 +1,4 @@
-//Testing Changes
+
 
 using Microsoft.EntityFrameworkCore;
 using ST10438307_GLMS.Components;
@@ -23,7 +23,7 @@ builder.Services.AddDbContextFactory<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 //-------------------------------------------------------
 
-//Currency Service 
+//Currency Service - httpclient registered as a typed client
 //-------------------------------------------------------
 builder.Services.AddHttpClient<CurrencyService>();
 builder.Services.AddScoped<ICurrencyService, CurrencyService>();
