@@ -13,7 +13,7 @@ public class InternationalContractFactory : IContractFactory
             ServiceLevel = "International",
             Status = ContractStatus.Draft,
             StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddYears(1)
+            EndDate = DateTime.Today.AddYears(3)// 3 years = international contract default
         };
     }
 }

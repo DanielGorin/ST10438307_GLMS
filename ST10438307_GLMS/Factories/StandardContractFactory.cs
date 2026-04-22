@@ -13,7 +13,7 @@ public class StandardContractFactory : IContractFactory
             ServiceLevel = "Standard",
             Status = ContractStatus.Draft,
             StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddYears(1)
+            EndDate = DateTime.Today.AddYears(1)// 1 years = standard contract default
         };
     }
 }

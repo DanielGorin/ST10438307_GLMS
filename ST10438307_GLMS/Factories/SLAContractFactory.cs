@@ -13,7 +13,7 @@ public class SLAContractFactory : IContractFactory
             ServiceLevel = "SLA",
             Status = ContractStatus.Draft,
             StartDate = DateTime.Today,
-            EndDate = DateTime.Today.AddYears(1)
+            EndDate = DateTime.Today.AddYears(2)//2 years = SLA default
         };
     }
 }
